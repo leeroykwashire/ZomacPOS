@@ -2,25 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 
-import 'database/tables/all_tables.dart';
+import 'core/constants.dart';
+import 'core/theme.dart';
+import 'database/app_database.dart';
+import 'database/id_generator.dart';
 import 'providers/database_providers.dart';
+import 'providers/app_providers.dart';
+import 'screens/auth/login_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
-      title: 'POS System',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'POS System'),
+      title: AppConstants.appName,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      home: const LoginScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -38,7 +45,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productsProvider);
-    final syncStatus = ref.watch(syncStatusProvider);
+    final syncStats = ref.watch(syncStatsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -68,12 +75,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             const SizedBox(height: 20),
             
             // Sync status
-            syncStatus.when(
+            syncStats.when(
               data: (status) => Column(
                 children: [
-                  Text('Pending sync items: ${status['pending_items']}'),
-                  Text('Failed sync items: ${status['failed_items']}'),
-                  Text('Conflicted items: ${status['conflicted_items']}'),
+                  Text('Pending sync items: ${status.pendingRecords}'),
+                  Text('Queued items: ${status.queuedItems}'),
+                  Text('Conflicted items: ${status.conflictedRecords}'),
                 ],
               ),
               loading: () => const CircularProgressIndicator(),
@@ -107,14 +114,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     final database = ref.read(databaseProvider);
     
     try {
-      await database.into(database.products).insert(ProductsCompanion.insert(
+      // Add a sample product to test the database
+      await database.productsDao.createProduct(ProductsCompanion.insert(
         id: IdGenerator.generateLocalId(),
         name: 'Sample Product ${DateTime.now().millisecondsSinceEpoch}',
         price: 29.99,
-        qty: 100,
+        qty: const Value(100),
         currencyId: 'default-currency',
-        companyId: const Value('default-company'),
-        sku: 'SP${DateTime.now().millisecondsSinceEpoch}',
+        companyId: 'default-company',
+        sku: Value('SP${DateTime.now().millisecondsSinceEpoch}'),
       ));
       
       // Refresh the products list
@@ -135,15 +143,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   }
 
   Future<void> _performSync() async {
-    final syncService = ref.read(syncServiceProvider);
-    
+    // Sync functionality would use the sync DAO
     try {
-      await syncService.performSync();
-      ref.invalidate(syncStatusProvider);
-      
+      // For now, just show a message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sync completed successfully!')),
+          const SnackBar(content: Text('Sync functionality coming soon!')),
         );
       }
     } catch (e) {

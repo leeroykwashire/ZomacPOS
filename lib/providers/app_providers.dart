@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/tables/all_tables.dart';
+import '../database/app_database.dart';
 import '../providers/database_providers.dart';
 
 // Current user provider - will be properly typed after code generation
@@ -16,7 +16,7 @@ class CurrentUserNotifier extends StateNotifier<Map<String, dynamic>?> {
   
   Future<bool> login(String email, String password) async {
     try {
-      final user = await _database.getUserByEmail(email);
+      final user = await _database.usersDao.getUserByEmail(email);
       if (user != null) {
         // In a real app, you'd verify the password hash here
         state = user.toJson();
