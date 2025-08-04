@@ -4,10 +4,10 @@ import 'package:drift/drift.dart' hide Column;
 
 import 'core/constants.dart';
 import 'core/theme.dart';
+import 'core/app_initializer.dart';
 import 'database/app_database.dart';
 import 'database/id_generator.dart';
 import 'providers/app_providers.dart';
-import 'screens/auth/login_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -25,7 +25,7 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      home: const LoginScreen(),
+      home: const AppInitializer(),
       debugShowCheckedModeBanner: false,
     );
   }

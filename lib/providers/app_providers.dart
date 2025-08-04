@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../database/app_database.dart';
 import '../providers/database_providers.dart';
 
@@ -38,14 +42,19 @@ class CurrentUserNotifier extends StateNotifier<Map<String, dynamic>?> {
         
         if (passwordMatch) {
           // Simple password check - in production, use proper password hashing
-          state = {
+          final userData = {
             'id': user.id,
             'fullName': user.fullName,
             'email': user.email,
             'role': user.role,
             'companyId': user.companyId,
           };
+          state = userData;
           print('🎉 Login successful! User state set.');
+          
+          // Save session for persistence
+          await _saveUserSession(userData);
+          
           return true;
         } else {
           print('❌ Password mismatch!');
@@ -62,8 +71,98 @@ class CurrentUserNotifier extends StateNotifier<Map<String, dynamic>?> {
     }
   }
   
+  Future<bool> register(String fullName, String email, String password, String role) async {
+    try {
+      print('🔍 Registration attempt: email="$email", fullName="$fullName", role="$role"');
+      
+      // Check if email already exists
+      final existingUser = await _database.usersDao.getUserByEmail(email);
+      if (existingUser != null) {
+        print('❌ User already exists with email: "$email"');
+        return false;
+      }
+      
+      // Get default company using helper method
+      final defaultCompanyId = await _database.getDefaultCompanyId();
+      if (defaultCompanyId == null) {
+        print('❌ No default company found for registration');
+        return false;
+      }
+      
+      print('🏢 Using company ID: $defaultCompanyId');
+      
+      // Create new user
+      const uuid = Uuid();
+      final userCompanion = UsersCompanion.insert(
+        id: uuid.v4(),
+        fullName: fullName,
+        email: email,
+        password: password, // In production, hash this password
+        role: Value(role),
+        companyId: defaultCompanyId,
+      );
+      
+      final userId = await _database.usersDao.createUser(userCompanion);
+      print('✅ User created successfully with ID: $userId');
+      
+      return true;
+    } catch (e) {
+      print('💥 Registration error: $e');
+      return false;
+    }
+  }
+  
   void logout() {
     state = null;
+    // Clear from persistent storage
+    _clearUserSession();
+  }
+  
+  Future<void> _clearUserSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('user_session');
+      print('🗑️ User session cleared from persistent storage');
+    } catch (e) {
+      print('❌ Error clearing user session: $e');
+    }
+  }
+  
+  Future<void> _saveUserSession(Map<String, dynamic> userData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = jsonEncode(userData);
+      await prefs.setString('user_session', userJson);
+      print('💾 User session saved: ${userData['email']}');
+    } catch (e) {
+      print('❌ Error saving user session: $e');
+    }
+  }
+  
+  Future<void> loadSavedSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString('user_session');
+      
+      if (userJson != null) {
+        final userData = jsonDecode(userJson) as Map<String, dynamic>;
+        
+        // Verify the user still exists in the database
+        final user = await _database.usersDao.getUserById(userData['id']);
+        if (user != null) {
+          state = userData;
+          print('🔄 User session restored: ${userData['email']}');
+        } else {
+          // User no longer exists, clear the session
+          await _clearUserSession();
+          print('🚫 Stored user no longer exists, session cleared');
+        }
+      } else {
+        print('📱 No saved session found');
+      }
+    } catch (e) {
+      print('❌ Error loading saved session: $e');
+    }
   }
   
   bool get isLoggedIn => state != null;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants.dart';
+import '../../providers/app_providers.dart';
 import '../../widgets/widgets.dart';
 import 'login_screen.dart';
 
@@ -68,10 +69,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement user registration logic
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
-      
-      if (mounted) {
+      final fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      final role = _selectedRole.value;
+
+      final success = await ref
+          .read(currentUserProvider.notifier)
+          .register(fullName, email, password, role);
+
+      if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Registration successful! Please sign in.'),
@@ -84,6 +91,17 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
         );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Registration failed. Email may already exist.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.buttonBorderRadius),
+            ),
+          ),
         );
       }
     } catch (e) {
