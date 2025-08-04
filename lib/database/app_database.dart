@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 
 // Import all tables
 import 'tables/users_table.dart';
@@ -79,10 +80,20 @@ class AppDatabase extends _$AppDatabase {
 
   // Seed initial data
   Future<void> _seedInitialData() async {
+    const uuid = Uuid();
+    
+    // Generate consistent UUIDs for initial data
+    final companyId = uuid.v4();
+    final currencyId = uuid.v4();
+    final adminId = uuid.v4();
+    final categoryId = uuid.v4();
+    final product1Id = uuid.v4();
+    final product2Id = uuid.v4();
+    
     // Create default company
     final defaultCompany = await into(companies).insertReturning(
       CompaniesCompanion.insert(
-        id: 'default-company',
+        id: companyId,
         name: 'My Business',
         email: 'admin@mybusiness.com',
         currency: const Value('USD'),
@@ -92,7 +103,7 @@ class AppDatabase extends _$AppDatabase {
     // Create default currency
     await into(currencies).insert(
       CurrenciesCompanion.insert(
-        id: 'default-currency',
+        id: currencyId,
         name: 'US Dollar',
         code: 'USD',
         symbol: '\$',
@@ -104,7 +115,7 @@ class AppDatabase extends _$AppDatabase {
     // Create default admin user
     await into(users).insert(
       UsersCompanion.insert(
-        id: 'default-admin',
+        id: adminId,
         fullName: 'System Administrator',
         email: 'admin@pos.local',
         password: 'admin123', // In real app, hash this!
@@ -116,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
     // Create default category
     await into(categories).insert(
       CategoriesCompanion.insert(
-        id: 'default-category',
+        id: categoryId,
         name: 'General',
         description: const Value('Default category for products'),
         companyId: defaultCompany.id,
@@ -126,12 +137,12 @@ class AppDatabase extends _$AppDatabase {
     // Add some sample products
     await into(products).insert(
       ProductsCompanion.insert(
-        id: 'sample-product-1',
+        id: product1Id,
         name: 'Sample Product 1',
         price: 19.99,
         qty: const Value(100),
-        categoryId: const Value('default-category'),
-        currencyId: 'default-currency',
+        categoryId: Value(categoryId),
+        currencyId: currencyId,
         companyId: defaultCompany.id,
         sku: const Value('SP001'),
       )
@@ -139,12 +150,12 @@ class AppDatabase extends _$AppDatabase {
 
     await into(products).insert(
       ProductsCompanion.insert(
-        id: 'sample-product-2',
+        id: product2Id,
         name: 'Sample Product 2',
         price: 29.99,
         qty: const Value(50),
-        categoryId: const Value('default-category'),
-        currencyId: 'default-currency',
+        categoryId: Value(categoryId),
+        currencyId: currencyId,
         companyId: defaultCompany.id,
         sku: const Value('SP002'),
       )

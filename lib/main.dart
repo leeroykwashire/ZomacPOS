@@ -113,14 +113,20 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     final database = ref.read(databaseProvider);
     
     try {
+      // Get the default company ID
+      final companyId = await database.getDefaultCompanyId();
+      if (companyId == null) {
+        throw Exception('No default company found');
+      }
+      
       // Add a sample product to test the database
       await database.productsDao.createProduct(ProductsCompanion.insert(
         id: IdGenerator.generateLocalId(),
         name: 'Sample Product ${DateTime.now().millisecondsSinceEpoch}',
         price: 29.99,
         qty: const Value(100),
-        currencyId: 'default-currency',
-        companyId: 'default-company',
+        currencyId: 'default-currency', // This should also use a dynamic ID
+        companyId: companyId,
         sku: Value('SP${DateTime.now().millisecondsSinceEpoch}'),
       ));
       

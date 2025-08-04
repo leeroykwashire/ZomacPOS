@@ -182,7 +182,8 @@ class InventoryService {
     if (product == null) throw Exception('Product not found');
 
     // Get default company ID
-    final companyId = await database.getDefaultCompanyId() ?? 'default-company';
+    final companyId = await database.getDefaultCompanyId();
+    if (companyId == null) throw Exception('No default company found. Please initialize the database.');
 
     // Calculate new quantity
     final newQuantity = product.qty + quantityChange;

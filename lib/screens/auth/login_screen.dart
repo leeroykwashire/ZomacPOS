@@ -5,6 +5,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/widgets.dart';
 import 'registration_screen.dart';
 import '../home/home_screen.dart';
+import '../../debug/auth_debug_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -234,7 +235,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     if (value == null || value.isEmpty) {
                                       return 'Please enter your email';
                                     }
-                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                    // Updated regex to allow .local domains and other common patterns
+                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)*[\w-]{2,}$').hasMatch(value)) {
                                       return 'Please enter a valid email';
                                     }
                                     return null;
@@ -319,6 +321,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                         ),
                         const SizedBox(height: 32),
+
+                        // Debug button (hidden tap area)
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const AuthDebugScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 20,
+                            color: Colors.transparent,
+                            child: const Center(
+                              child: Text(
+                                '🔧',
+                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                         // Register Link
                         Row(

@@ -21,14 +21,43 @@ class CurrentUserNotifier extends StateNotifier<Map<String, dynamic>?> {
   
   Future<bool> login(String email, String password) async {
     try {
+      print('🔍 Login attempt: email="$email", password="$password"');
+      
       final user = await _database.usersDao.getUserByEmail(email);
+      print('👤 User found: ${user != null}');
+      
       if (user != null) {
-        // In a real app, you'd verify the password hash here
-        state = user.toJson();
-        return true;
+        print('📧 User email: "${user.email}"');
+        print('🔑 Stored password: "${user.password}"');
+        print('🆔 User ID: ${user.id}');
+        print('👑 User role: ${user.role}');
+        print('🏢 Company ID: ${user.companyId}');
+        
+        final passwordMatch = user.password == password;
+        print('✅ Password match: $passwordMatch');
+        
+        if (passwordMatch) {
+          // Simple password check - in production, use proper password hashing
+          state = {
+            'id': user.id,
+            'fullName': user.fullName,
+            'email': user.email,
+            'role': user.role,
+            'companyId': user.companyId,
+          };
+          print('🎉 Login successful! User state set.');
+          return true;
+        } else {
+          print('❌ Password mismatch!');
+          print('   Expected: "$password"');
+          print('   Got: "${user.password}"');
+        }
+      } else {
+        print('❌ No user found with email: "$email"');
       }
       return false;
     } catch (e) {
+      print('💥 Login error: $e');
       return false;
     }
   }
