@@ -99,6 +99,13 @@ class CartDao extends DatabaseAccessor<AppDatabase> with _$CartDaoMixin {
     return item != null;
   }
 
+  // Get total cart items count across all sessions (for dashboard)
+  Future<int> getCartItemsCount() async {
+    final result = await (selectOnly(carts)
+      ..addColumns([carts.qty.sum()])).getSingleOrNull();
+    return result?.read(carts.qty.sum()) ?? 0;
+  }
+
   // Get cart summary
   Future<CartSummary> getCartSummary(String sessionId) async {
     final items = await getCartItems(sessionId);
