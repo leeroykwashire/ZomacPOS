@@ -58,6 +58,16 @@ class Suppliers extends Table with SyncableTable {
   BoolColumn get isActive => boolean().withDefault(const Constant(true)).named('is_active')();
 }
 
+// Stock Movements table
+class StockMovements extends Table with SyncableTable {
+  TextColumn get productId => text().named('product_id')();
+  TextColumn get actionId => text().named('action_id')();
+  TextColumn get companyId => text().named('company_id')();
+  IntColumn get initialQty => integer().named('initial_qty')();
+  IntColumn get finalQty => integer().named('final_qty')();
+  TextColumn get notes => text().nullable()();
+}
+
 // App settings table
 class AppSettings extends Table {
   IntColumn get id => integer().autoIncrement()();

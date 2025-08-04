@@ -75,9 +75,71 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
     }
   }
 
-  // Create product
+  // Generate automatic SKU if not provided
+  Future<String> _generateSKU() async {
+    final count = await getTotalProductsCount();
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    return 'SKU${(count + 1).toString().padLeft(4, '0')}$timestamp';
+  }
+
+  // Generate automatic barcode if not provided
+  Future<String> _generateBarcode() async {
+    final count = await getTotalProductsCount();
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(6);
+    return '${(count + 1).toString().padLeft(6, '0')}$timestamp';
+  }
+
+  // Check if SKU already exists
+  Future<bool> skuExists(String sku) async {
+    final result = await (select(products)..where((p) => p.sku.equals(sku))).getSingleOrNull();
+    return result != null;
+  }
+
+  // Check if barcode already exists
+  Future<bool> barcodeExists(String barcode) async {
+    final result = await (select(products)..where((p) => p.barcode.equals(barcode))).getSingleOrNull();
+    return result != null;
+  }
+
+  // Generate unique SKU
+  Future<String> generateUniqueSKU() async {
+    String sku;
+    do {
+      sku = await _generateSKU();
+    } while (await skuExists(sku));
+    return sku;
+  }
+
+  // Generate unique barcode
+  Future<String> generateUniqueBarcode() async {
+    String barcode;
+    do {
+      barcode = await _generateBarcode();
+    } while (await barcodeExists(barcode));
+    return barcode;
+  }
+
+  // Create product with automatic SKU/barcode generation
   Future<String> createProduct(ProductsCompanion product) async {
-    return await into(products).insertReturning(product).then((p) => p.id);
+    // Generate SKU if not provided
+    String? sku = product.sku.present ? product.sku.value : null;
+    if (sku == null || sku.isEmpty) {
+      sku = await generateUniqueSKU();
+    }
+
+    // Generate barcode if not provided
+    String? barcode = product.barcode.present ? product.barcode.value : null;
+    if (barcode == null || barcode.isEmpty) {
+      barcode = await generateUniqueBarcode();
+    }
+
+    // Create product with generated values
+    final enhancedProduct = product.copyWith(
+      sku: Value(sku),
+      barcode: Value(barcode),
+    );
+
+    return await into(products).insertReturning(enhancedProduct).then((p) => p.id);
   }
 
   // Insert product (alias for createProduct)

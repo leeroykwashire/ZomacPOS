@@ -22,6 +22,7 @@ import 'daos/products_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/cart_dao.dart';
 import 'daos/sync_dao.dart';
+import 'daos/stock_movements_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -46,6 +47,7 @@ part 'app_database.g.dart';
     Expenses,
     Customers,
     Suppliers,
+    StockMovements,
     AppSettings,
   ],
   daos: [
@@ -55,6 +57,7 @@ part 'app_database.g.dart';
     SalesDao,
     CartDao,
     SyncDao,
+    StockMovementsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

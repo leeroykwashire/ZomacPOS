@@ -4,6 +4,7 @@ import '../../core/constants.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/widgets.dart';
 import '../products/products_screen.dart';
+import '../inventory/inventory_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -331,9 +332,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           color: Colors.green,
         ),
         QuickActionButton(
-          label: 'Products',
+          label: 'Inventory',
           icon: Icons.inventory_2,
-          onTap: () => _navigateToProducts(),
+          onTap: () => _navigateToInventory(),
           color: Colors.blue,
         ),
         QuickActionButton(
@@ -477,6 +478,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  void _navigateToInventory() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const InventoryScreen(),
+      ),
+    );
+  }
+
   void _navigateToReports() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Reports screen coming soon!')),
@@ -524,8 +533,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _showLowStockItems() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Low stock items coming soon!')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const InventoryScreen(),
+      ),
     );
   }
 
