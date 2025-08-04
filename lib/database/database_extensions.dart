@@ -4,16 +4,16 @@ import 'app_database.dart';
 extension ProductExtension on Product {
   double get totalValue => price * qty;
   
-  bool get isLowStock => qty <= 10; // Configurable threshold
+  bool get isLowStock => qty <= minQty; // Use minQty field from table
   
-  double calculateVatAmount(double quantity) {
-    return (price * quantity * vatRate) / 100;
+  double calculateTaxAmount(double quantity) {
+    return (price * quantity * taxRate) / 100;
   }
   
   double calculateSubtotal(double quantity) {
     final subtotal = price * quantity;
-    final vat = calculateVatAmount(quantity);
-    return subtotal + vat;
+    final tax = calculateTaxAmount(quantity);
+    return subtotal + tax;
   }
   
   Map<String, dynamic> toSyncJson() {
@@ -23,12 +23,17 @@ extension ProductExtension on Product {
       'price': price,
       'qty': qty,
       'currency_id': currencyId,
-      'warehouse_id': warehouseId,
       'category_id': categoryId,
       'company_id': companyId,
       'sku': sku,
-      'cost_price': costPrice,
-      'vat_rate': vatRate,
+      'cost': cost,
+      'tax_rate': taxRate,
+      'description': description,
+      'barcode': barcode,
+      'min_qty': minQty,
+      'track_stock': trackStock,
+      'is_active': isActive,
+      'image_url': imageUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -37,36 +42,30 @@ extension ProductExtension on Product {
 
 extension SaleExtension on Sale {
   String get formattedReceiptNumber {
-    return receiptNumber ?? 'RCP-${id.substring(0, 8).toUpperCase()}';
+    return 'RCP-${id.substring(0, 8).toUpperCase()}';
   }
   
   Map<String, dynamic> toSyncJson() {
     return {
       'id': syncId ?? id,
-      'user_id': userId,
-      'company_id': companyId,
-      'total_amount': totalAmount,
+      'receipt_number': receiptNumber,
+      'subtotal': subtotal,
+      'tax': tax,
+      'discount': discount,
+      'total': total,
+      'amount_paid': amountPaid,
+      'change': change,
       'status': status,
       'payment_method': paymentMethod,
       'notes': notes,
-      'cash_customer_id': cashCustomerId,
-      'vat_amount': vatAmount,
-      'receipt_number': receiptNumber,
+      'cashier_id': cashierId,
+      'customer_id': customerId,
+      'company_id': companyId,
+      'sale_date': saleDate.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
   }
-}
-
-extension CashDrawerExtension on CashDrawer {
-  double get totalExpected => openingBalance + cashSalesTotal;
-  
-  double get variance {
-    if (closingBalance == null) return 0.0;
-    return closingBalance! - totalExpected;
-  }
-  
-  bool get isBalanced => variance.abs() < 0.01; // Allow for small rounding differences
 }
 
 extension UserExtension on User {
@@ -80,15 +79,14 @@ extension CartExtension on Cart {
   
   Map<String, dynamic> toSyncJson() {
     return {
-      'id': syncId ?? id,
-      'user_id': userId,
+      'id': id.toString(),
       'product_id': productId,
+      'product_name': productName,
       'qty': qty,
       'price': price,
       'subtotal': subtotal,
-      'status': status,
+      'session_id': sessionId,
       'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
     };
   }
 }
@@ -99,21 +97,21 @@ class CartCalculator {
     return cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
   }
   
-  static double calculateTotalVat(List<Cart> cartItems, List<Product> products) {
-    double totalVat = 0.0;
+  static double calculateTotalTax(List<Cart> cartItems, List<Product> products) {
+    double totalTax = 0.0;
     for (final item in cartItems) {
       final product = products.firstWhere((p) => p.id == item.productId);
-      totalVat += (item.subtotal * product.vatRate) / (100 + product.vatRate);
+      totalTax += (item.subtotal * product.taxRate) / (100 + product.taxRate);
     }
-    return totalVat;
+    return totalTax;
   }
   
   static Map<String, double> calculateTotals(List<Cart> cartItems, List<Product> products) {
     final subtotal = calculateSubtotal(cartItems);
-    final vat = calculateTotalVat(cartItems, products);
+    final tax = calculateTotalTax(cartItems, products);
     return {
-      'subtotal': subtotal - vat,
-      'vat': vat,
+      'subtotal': subtotal - tax,
+      'tax': tax,
       'total': subtotal,
     };
   }

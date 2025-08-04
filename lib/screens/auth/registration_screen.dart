@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants.dart';
-import '../../providers/app_providers.dart';
 import '../../widgets/widgets.dart';
 import 'login_screen.dart';
 
