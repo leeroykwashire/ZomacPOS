@@ -43,6 +43,10 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
   Future<Product?> getProductByBarcode(String barcode) =>
     (select(products)..where((p) => p.barcode.equals(barcode))).getSingleOrNull();
 
+  // Get product by SKU
+  Future<Product?> getProductBySku(String sku) =>
+    (select(products)..where((p) => p.sku.equals(sku))).getSingleOrNull();
+
   // Update product stock
   Future<void> updateStock(String productId, int newQty) =>
     (update(products)..where((p) => p.id.equals(productId)))
