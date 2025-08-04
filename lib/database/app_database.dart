@@ -17,6 +17,7 @@ import 'tables/other_tables.dart';
 
 // Import all DAOs
 import 'daos/users_dao.dart';
+import 'daos/categories_dao.dart';
 import 'daos/products_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/cart_dao.dart';
@@ -49,6 +50,7 @@ part 'app_database.g.dart';
   ],
   daos: [
     UsersDao,
+    CategoriesDao,
     ProductsDao,
     SalesDao,
     CartDao,

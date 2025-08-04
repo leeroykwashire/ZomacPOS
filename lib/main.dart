@@ -6,7 +6,6 @@ import 'core/constants.dart';
 import 'core/theme.dart';
 import 'database/app_database.dart';
 import 'database/id_generator.dart';
-import 'providers/database_providers.dart';
 import 'providers/app_providers.dart';
 import 'screens/auth/login_screen.dart';
 
@@ -78,9 +77,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             syncStats.when(
               data: (status) => Column(
                 children: [
-                  Text('Pending sync items: ${status.pendingRecords}'),
-                  Text('Queued items: ${status.queuedItems}'),
-                  Text('Conflicted items: ${status.conflictedRecords}'),
+                  Text('Pending sync items: ${status['pendingItems'] ?? 0}'),
+                  Text('Queued items: ${status['errors'] ?? 0}'),
+                  Text('Status: ${status['status'] ?? 'unknown'}'),
                 ],
               ),
               loading: () => const CircularProgressIndicator(),

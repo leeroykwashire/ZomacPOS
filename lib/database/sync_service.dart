@@ -12,6 +12,16 @@ class SyncService {
     print('Sync service called - implementation pending');
   }
   
+  // Get sync stats stream
+  Stream<Map<String, dynamic>> getSyncStats() {
+    return Stream.periodic(Duration(seconds: 30), (i) => {
+      'lastSyncTime': DateTime.now().millisecondsSinceEpoch,
+      'pendingItems': 0,
+      'errors': 0,
+      'status': 'connected',
+    });
+  }
+  
   // Simplified queue management without database dependency
   Future<void> queueForSync(String table, String localId, String operation, Map<String, dynamic> data) async {
     // TODO: Add to sync queue when sync infrastructure is ready

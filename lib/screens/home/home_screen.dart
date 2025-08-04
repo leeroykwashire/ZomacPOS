@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants.dart';
 import '../../providers/app_providers.dart';
-import '../../providers/dashboard_providers.dart';
 import '../../widgets/widgets.dart';
+import '../products/products_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -336,6 +336,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           onTap: () => _navigateToProducts(),
           color: Colors.blue,
         ),
+        QuickActionButton(
+          label: 'Sales History',
+          icon: Icons.receipt_long,
+          onTap: () => _viewAllSales(),
+          color: Colors.teal,
+        ),
         if (canViewFinancials) ...[
           QuickActionButton(
             label: 'Reports',
@@ -463,9 +469,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _navigateToProducts() {
-    // TODO: Navigate to products screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products screen coming soon!')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ProductsScreen(),
+      ),
     );
   }
 
@@ -494,8 +501,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _viewAllSales() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sales history coming soon!')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SalesHistoryScreen(),
+      ),
     );
   }
 

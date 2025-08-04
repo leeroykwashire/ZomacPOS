@@ -71,6 +71,9 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
     return await into(products).insertReturning(product).then((p) => p.id);
   }
 
+  // Insert product (alias for createProduct)
+  Future<String> insertProduct(ProductsCompanion product) => createProduct(product);
+
   // Update product
   Future<void> updateProduct(String productId, ProductsCompanion product) =>
     (update(products)..where((p) => p.id.equals(productId)))
@@ -84,6 +87,28 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       ));
+
+  // Get total products count
+  Future<int> getTotalProductsCount() async {
+    final result = await (selectOnly(products)
+      ..addColumns([products.id.count()])).getSingleOrNull();
+    return result?.read(products.id.count()) ?? 0;
+  }
+
+  // Get active products count
+  Future<int> getActiveProductsCount() async {
+    final result = await (selectOnly(products)
+      ..addColumns([products.id.count()])
+      ..where(products.isActive.equals(true))).getSingleOrNull();
+    return result?.read(products.id.count()) ?? 0;
+  }
+
+  // Get out of stock products
+  Future<List<Product>> getOutOfStockProducts() async {
+    final query = select(products)..where((p) => 
+      p.trackStock.equals(true) & p.qty.equals(0));
+    return await query.get();
+  }
 
   // Get products with categories (join)
   Future<List<ProductWithCategory>> getProductsWithCategories() {

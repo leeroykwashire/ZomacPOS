@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/app_database.dart';
 import '../providers/database_providers.dart';
 
+// Export all specific providers
+export 'products_providers.dart';
+export 'dashboard_providers.dart';
+export 'database_providers.dart';
+
 // Current user provider - will be properly typed after code generation
 final currentUserProvider = StateNotifierProvider<CurrentUserNotifier, Map<String, dynamic>?>((ref) {
   final database = ref.read(databaseProvider);

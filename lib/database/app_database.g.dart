@@ -16635,6 +16635,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SuppliersTable suppliers = $SuppliersTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final UsersDao usersDao = UsersDao(this as AppDatabase);
+  late final CategoriesDao categoriesDao = CategoriesDao(this as AppDatabase);
   late final ProductsDao productsDao = ProductsDao(this as AppDatabase);
   late final SalesDao salesDao = SalesDao(this as AppDatabase);
   late final CartDao cartDao = CartDao(this as AppDatabase);
