@@ -87,6 +87,81 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     );
   }
 
+  // Create a sale (for POS)
+  Future<Sale> createSale({
+    required String saleId,
+    String? customerId,
+    String? customerName, // Will be stored in notes for now
+    String? customerPhone, // Will be stored in notes for now
+    required double totalAmount,
+    required double subtotal,
+    required double taxAmount,
+    required double discountAmount,
+    required String paymentMethod,
+    required String status,
+    required String cashierId,
+    String? notes,
+  }) async {
+    final receiptNumber = 'R${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Combine customer info with notes
+    String? finalNotes = notes;
+    if (customerName != null || customerPhone != null) {
+      final customerInfo = <String>[];
+      if (customerName != null) customerInfo.add('Customer: $customerName');
+      if (customerPhone != null) customerInfo.add('Phone: $customerPhone');
+      finalNotes = customerInfo.join(', ') + (notes != null ? '\n$notes' : '');
+    }
+    
+    final companion = SalesCompanion.insert(
+      id: saleId,
+      companyId: 'default', // We'll need to get this from user context
+      customerId: Value(customerId),
+      receiptNumber: receiptNumber,
+      total: totalAmount,
+      subtotal: subtotal,
+      tax: taxAmount,
+      discount: Value(discountAmount),
+      paymentMethod: Value(paymentMethod),
+      status: Value(status),
+      cashierId: cashierId,
+      notes: Value(finalNotes),
+      saleDate: Value(DateTime.now()),
+    );
+
+    return await into(sales).insertReturning(companion);
+  }
+
+  // Add sale item (for POS)
+  Future<SalesItem> addSaleItem({
+    required String saleId,
+    required String productId,
+    required String productName,
+    required int qty,
+    required double price,
+    required double cost,
+    required double discount,
+    required double tax,
+    required double subtotal,
+  }) async {
+    final itemId = DateTime.now().microsecondsSinceEpoch.toString();
+    
+    final companion = SalesItemsCompanion.insert(
+      id: itemId,
+      saleId: saleId,
+      productId: productId,
+      productName: productName,
+      qty: qty,
+      price: price,
+      cost: Value(cost),
+      discount: Value(discount),
+      tax: Value(tax),
+      subtotal: subtotal,
+    );
+
+    return await into(salesItems).insertReturning(companion);
+  }
+
   // Get top selling products
   Future<List<TopSellingProduct>> getTopSellingProducts(DateTime start, DateTime end, {int limit = 10}) async {
     final query = selectOnly(salesItems)

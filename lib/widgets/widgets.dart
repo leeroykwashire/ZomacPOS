@@ -7,3 +7,4 @@ export 'app_button.dart';
 export 'dashboard/dashboard_widgets.dart';
 export 'products/product_card.dart';
 export 'sales/sales_widgets.dart';
+export 'pos/pos_widgets.dart';

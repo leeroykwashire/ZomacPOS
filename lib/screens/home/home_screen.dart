@@ -462,9 +462,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   // Navigation methods
   void _startNewSale() {
-    // TODO: Navigate to POS screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('POS screen coming soon!')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const POSScreen(),
+      ),
     );
   }
 

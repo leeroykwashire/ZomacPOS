@@ -48,6 +48,15 @@ class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin 
     (update(products)..where((p) => p.id.equals(productId)))
       .write(ProductsCompanion(qty: Value(newQty), updatedAt: Value(DateTime.now())));
 
+  // Update product stock by quantity change (for sales)
+  Future<void> updateProductStock(String productId, int quantityChange) async {
+    final product = await getProductById(productId);
+    if (product != null) {
+      final newQty = product.qty + quantityChange;
+      await updateStock(productId, newQty);
+    }
+  }
+
   // Decrease stock (for sales)
   Future<void> decreaseStock(String productId, int quantity) async {
     final product = await getProductById(productId);

@@ -58,3 +58,14 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String sync = '/sync';
 }
+
+// App Colors
+class AppColors {
+  static const Color primary = Color(0xFF1976D2);
+  static const Color primaryVariant = Color(0xFF1565C0);
+  static const Color secondary = Color(0xFF03DAC6);
+  static const Color success = Color(0xFF4CAF50);
+  static const Color error = Color(0xFFE53935);
+  static const Color warning = Color(0xFFFF9800);
+  static const Color info = Color(0xFF2196F3);
+}
