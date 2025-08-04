@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
-import 'tables/all_tables.dart';
+import 'app_database.dart';
 
 class SyncService {
   final AppDatabase _database;

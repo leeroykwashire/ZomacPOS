@@ -1,4 +1,4 @@
-import 'tables/all_tables.dart';
+import 'app_database.dart';
 
 // Extension methods for easier data manipulation
 extension ProductExtension on Product {
